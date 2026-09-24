@@ -8,82 +8,95 @@ public class CityGame {
 
     private final CityRepository cityRepository;
     private final Set<String> usedCities;
-    private final List<String> availableCities;
 
     private String lastCity;
     private int playerScore;
     private int computerScore;
+    private GameStatus gameStatus;
 
-    public CityGame() {
-        cityRepository = new CityRepository();
-        availableCities = cityRepository.getCities();
+    public CityGame(CityRepository cityRepository) {
+        this.cityRepository = cityRepository;
         usedCities = new HashSet<>();
+        gameStatus = GameStatus.IN_PROGRESS;
     }
 
-    public String validatePlayerMove(String city) {
+    public MoveResult processPlayerMove(String city) {
+        if (gameStatus != GameStatus.IN_PROGRESS) {
+            return new MoveResult(
+                    MoveStatus.GAME_OVER,
+                    null,
+                    "Гра вже завершена."
+            );
+        }
+
         if (city == null || city.isBlank()) {
-            return "Введіть назву міста.";
+            return new MoveResult(
+                    MoveStatus.INVALID_CITY,
+                    null,
+                    "Введіть назву міста."
+            );
         }
 
-        String normalizedCity = city.trim();
+        String normalizedCity = cityRepository.normalizeCityName(city);
 
-        if (!isCityAvailable(normalizedCity)) {
-            return "Такого міста немає в грі або воно вже використовувалося.";
+        if ("здаюсь".equals(normalizedCity)) {
+            gameStatus = GameStatus.COMPUTER_WON;
+
+            return new MoveResult(
+                    MoveStatus.COMPUTER_WON,
+                    null,
+                    "Ви здалися.\nПереміг комп'ютер!"
+            );
         }
 
-        if (!isCorrectFirstCity(normalizedCity)) {
-            return "Місто має починатися з літери \"" + getRequiredLetter() + "\".";
+        String cityFromRepository = cityRepository.findCity(normalizedCity);
+
+        if (cityFromRepository == null) {
+            return new MoveResult(
+                    MoveStatus.INVALID_CITY,
+                    null,
+                    "Такого міста немає в грі."
+            );
         }
 
-        return null;
-    }
-
-    public boolean isCityAvailable(String city) {
-        return availableCities.stream()
-                .anyMatch(availableCity ->
-                        availableCity.equalsIgnoreCase(city)
-                                && !usedCities.contains(availableCity));
-    }
-
-    public boolean isCorrectFirstCity(String city) {
-        return lastCity == null || startsWithRequiredLetter(city);
-    }
-
-    public String makeComputerMove(String playerCity) {
-        String normalizedPlayerCity = findCity(playerCity);
-
-        markCityAsUsed(normalizedPlayerCity);
-        lastCity = normalizedPlayerCity;
-        playerScore++;
-
-        String requiredLetter = getLastLetter(normalizedPlayerCity);
-
-        for (String city : availableCities) {
-            if (!usedCities.contains(city) && startsWith(city, requiredLetter)) {
-                markCityAsUsed(city);
-                lastCity = city;
-                computerScore++;
-                return city;
-            }
+        if (usedCities.contains(cityFromRepository)) {
+            return new MoveResult(
+                    MoveStatus.ALREADY_USED,
+                    null,
+                    "Це місто вже використовувалося."
+            );
         }
 
-        return null;
-    }
-
-    public boolean hasAvailableResponse() {
-        if (lastCity == null) {
-            return true;
+        if (lastCity != null && !startsWithRequiredLetter(cityFromRepository)) {
+            return new MoveResult(
+                    MoveStatus.WRONG_LETTER,
+                    null,
+                    "Місто має починатися з літери \""
+                            + getRequiredLetter()
+                            + "\"."
+            );
         }
 
-        String requiredLetter = getLastLetter(lastCity);
+        processPlayerCity(cityFromRepository);
 
-        for (String city : availableCities) {
-            if (!usedCities.contains(city) && startsWith(city, requiredLetter)) {
-                return true;
-            }
+        String computerCity = makeComputerMove();
+
+        if (computerCity == null) {
+            gameStatus = GameStatus.PLAYER_WON;
+
+            return new MoveResult(
+                    MoveStatus.PLAYER_WON,
+                    null,
+                    "У комп'ютера закінчилися міста.\n"
+                            + "Ви перемогли!"
+            );
         }
 
-        return false;
+        return new MoveResult(
+                MoveStatus.VALID,
+                computerCity,
+                null
+        );
     }
 
     public int getPlayerScore() {
@@ -94,12 +107,39 @@ public class CityGame {
         return computerScore;
     }
 
+    public GameStatus getGameStatus() {
+        return gameStatus;
+    }
+
     public String getRequiredLetter() {
         if (lastCity == null) {
             return "";
         }
 
         return getLastLetter(lastCity);
+    }
+
+    private void processPlayerCity(String city) {
+        usedCities.add(city);
+        lastCity = city;
+        playerScore++;
+    }
+
+    private String makeComputerMove() {
+        String requiredLetter = getRequiredLetter();
+        List<String> cities = cityRepository.getCities();
+
+        for (String city : cities) {
+            if (!usedCities.contains(city)
+                    && startsWith(city, requiredLetter)) {
+                usedCities.add(city);
+                lastCity = city;
+                computerScore++;
+                return city;
+            }
+        }
+
+        return null;
     }
 
     private boolean startsWithRequiredLetter(String city) {
@@ -111,8 +151,7 @@ public class CityGame {
     }
 
     private String getLastLetter(String city) {
-        String normalizedCity = city.trim().toLowerCase();
-
+        String normalizedCity = cityRepository.normalizeCityName(city);
         int index = normalizedCity.length() - 1;
 
         while (index > 0 && isSpecialEndingLetter(normalizedCity.charAt(index))) {
@@ -125,15 +164,5 @@ public class CityGame {
     private boolean isSpecialEndingLetter(char letter) {
         return letter == 'ь' || letter == 'ъ';
     }
-
-    private void markCityAsUsed(String city) {
-        usedCities.add(city);
-    }
-
-    private String findCity(String city) {
-        return availableCities.stream()
-                .filter(availableCity -> availableCity.equalsIgnoreCase(city))
-                .findFirst()
-                .orElseThrow();
-    }
 }
+

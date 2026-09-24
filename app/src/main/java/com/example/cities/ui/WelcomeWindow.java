@@ -13,7 +13,11 @@ import java.awt.Image;
 
 public class WelcomeWindow extends JFrame {
 
-    public WelcomeWindow() {
+    private final GameWindow gameWindow;
+
+    public WelcomeWindow(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
+
         setTitle("Міста");
         setIconImage(loadIcon());
         setSize(400, 100);
@@ -32,11 +36,13 @@ public class WelcomeWindow extends JFrame {
 
         startButton.addActionListener(event -> {
             dispose();
-            new GameWindow().setVisible(true);
+            gameWindow.setVisible(true);
         });
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        buttonPanel.setBorder(
+                BorderFactory.createEmptyBorder(0, 0, 5, 0)
+        );
         buttonPanel.add(startButton);
 
         add(welcomeLabel, BorderLayout.CENTER);
@@ -55,4 +61,3 @@ public class WelcomeWindow extends JFrame {
         );
     }
 }
-

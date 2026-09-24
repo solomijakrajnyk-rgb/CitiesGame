@@ -1,6 +1,8 @@
 package com.example.cities.ui;
 
 import com.example.cities.game.CityGame;
+import com.example.cities.game.MoveResult;
+import com.example.cities.game.MoveStatus;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -23,8 +25,8 @@ public class GameWindow extends JFrame {
     private final JLabel scoreLabel;
     private final JTextField cityInput;
 
-    public GameWindow() {
-        game = new CityGame();
+    public GameWindow(CityGame game) {
+        this.game = game;
 
         setTitle("Міста");
         setIconImage(loadIcon());
@@ -40,32 +42,46 @@ public class GameWindow extends JFrame {
                 "Комп'ютер: —",
                 JLabel.CENTER
         );
-        computerAnswerLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        computerAnswerLabel.setFont(
+                new Font("SansSerif", Font.PLAIN, 16)
+        );
 
         scoreLabel = new JLabel(
                 "Рахунок: 0 : 0",
                 JLabel.CENTER
         );
-        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        scoreLabel.setFont(
+                new Font("SansSerif", Font.BOLD, 14)
+        );
 
-        JPanel topPanel = new JPanel(new GridLayout(3, 1, 5, 5));
-        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+        JPanel topPanel = new JPanel(
+                new GridLayout(3, 1, 5, 5)
+        );
+        topPanel.setBorder(
+                BorderFactory.createEmptyBorder(15, 15, 10, 15)
+        );
         topPanel.add(titleLabel);
         topPanel.add(computerAnswerLabel);
         topPanel.add(scoreLabel);
 
         JLabel inputLabel = new JLabel("Введіть назву міста:");
-        inputLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        inputLabel.setFont(
+                new Font("SansSerif", Font.PLAIN, 14)
+        );
 
         cityInput = new JTextField();
         cityInput.setPreferredSize(new Dimension(250, 30));
 
         JButton moveButton = new JButton("Зробити хід");
-        moveButton.setPreferredSize(new Dimension(130, 30));
+        moveButton.setPreferredSize(
+                new Dimension(130, 30)
+        );
         moveButton.addActionListener(event -> makeMove());
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        inputPanel.setBorder(
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        );
         inputPanel.add(inputLabel);
         inputPanel.add(cityInput);
         inputPanel.add(moveButton);
@@ -77,41 +93,49 @@ public class GameWindow extends JFrame {
     }
 
     private void makeMove() {
-        String playerCity = cityInput.getText().trim();
+        String playerCity = cityInput.getText();
 
-        if ("здаюсь".equalsIgnoreCase(playerCity)) {
-            showGameOver(
-                    "Ви здалися.\nПереміг комп'ютер!"
-            );
-            return;
+        MoveResult result = game.processPlayerMove(playerCity);
+
+        switch (result.getStatus()) {
+            case VALID:
+                computerAnswerLabel.setText(
+                        "Комп'ютер: " + result.getComputerCity()
+                );
+                updateScore();
+                clearInput();
+                break;
+
+            case INVALID_CITY:
+            case ALREADY_USED:
+            case WRONG_LETTER:
+                showError(result.getMessage());
+                break;
+
+            case PLAYER_WON:
+            case COMPUTER_WON:
+                updateScore();
+                showGameOver(result.getMessage());
+                break;
+
+            case GAME_OVER:
+                showError(result.getMessage());
+                break;
         }
+    }
 
-        String validationMessage = game.validatePlayerMove(playerCity);
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Помилка",
+                JOptionPane.WARNING_MESSAGE
+        );
 
-        if (validationMessage != null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    validationMessage,
-                    "Помилка",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            cityInput.requestFocusInWindow();
-            return;
-        }
+        cityInput.requestFocusInWindow();
+    }
 
-        String computerCity = game.makeComputerMove(playerCity);
-
-        if (computerCity == null) {
-            updateScore();
-            showGameOver(
-                    "У комп'ютера закінчилися міста.\nВи перемогли!"
-            );
-            return;
-        }
-
-        computerAnswerLabel.setText("Комп'ютер: " + computerCity);
-        updateScore();
-
+    private void clearInput() {
         cityInput.setText("");
         cityInput.requestFocusInWindow();
         cityInput.setCaretPosition(0);
@@ -152,4 +176,3 @@ public class GameWindow extends JFrame {
         );
     }
 }
-
