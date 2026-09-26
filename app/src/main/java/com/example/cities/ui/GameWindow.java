@@ -21,12 +21,17 @@ import java.awt.Image;
 public class GameWindow extends JFrame {
 
     private final CityGame game;
+    private final Runnable newGameAction;
     private final JLabel computerAnswerLabel;
     private final JLabel scoreLabel;
     private final JTextField cityInput;
 
-    public GameWindow(CityGame game) {
+    public GameWindow(
+            CityGame game,
+            Runnable newGameAction
+    ) {
         this.game = game;
+        this.newGameAction = newGameAction;
 
         setTitle("Міста");
         setIconImage(loadIcon());
@@ -152,16 +157,24 @@ public class GameWindow extends JFrame {
         String fullMessage = message
                 + "\n\nВаш рахунок: " + game.getPlayerScore()
                 + "\nРахунок комп'ютера: " + game.getComputerScore()
-                + "\n\nДякуємо за гру!";
+                + "\n\nБажаєте зіграти ще раз?";
 
-        JOptionPane.showMessageDialog(
+        int choice = JOptionPane.showOptionDialog(
                 this,
                 fullMessage,
                 "Гра завершена",
-                JOptionPane.INFORMATION_MESSAGE
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new Object[]{"Нова гра", "Вийти"},
+                "Нова гра"
         );
 
         dispose();
+
+        if (choice == JOptionPane.YES_OPTION) {
+            newGameAction.run();
+        }
     }
 
     private Image loadIcon() {

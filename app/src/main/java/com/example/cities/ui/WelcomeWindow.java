@@ -13,10 +13,10 @@ import java.awt.Image;
 
 public class WelcomeWindow extends JFrame {
 
-    private final GameWindow gameWindow;
+    private final Runnable startGameAction;
 
-    public WelcomeWindow(GameWindow gameWindow) {
-        this.gameWindow = gameWindow;
+    public WelcomeWindow(Runnable startGameAction) {
+        this.startGameAction = startGameAction;
 
         setTitle("Міста");
         setIconImage(loadIcon());
@@ -36,7 +36,7 @@ public class WelcomeWindow extends JFrame {
 
         startButton.addActionListener(event -> {
             dispose();
-            gameWindow.setVisible(true);
+            startGameAction.run();
         });
 
         JPanel buttonPanel = new JPanel();

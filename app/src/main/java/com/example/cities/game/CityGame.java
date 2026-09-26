@@ -7,6 +7,7 @@ import java.util.Set;
 public class CityGame {
 
     private final CityRepository cityRepository;
+    private final CityNameNormalizer cityNameNormalizer;
     private final Set<String> usedCities;
 
     private String lastCity;
@@ -16,6 +17,7 @@ public class CityGame {
 
     public CityGame(CityRepository cityRepository) {
         this.cityRepository = cityRepository;
+        cityNameNormalizer = new CityNameNormalizer();
         usedCities = new HashSet<>();
         gameStatus = GameStatus.IN_PROGRESS;
     }
@@ -37,7 +39,7 @@ public class CityGame {
             );
         }
 
-        String normalizedCity = cityRepository.normalizeCityName(city);
+        String normalizedCity = cityNameNormalizer.normalize(city);
 
         if ("здаюсь".equals(normalizedCity)) {
             gameStatus = GameStatus.COMPUTER_WON;
@@ -147,14 +149,16 @@ public class CityGame {
     }
 
     private boolean startsWith(String city, String letter) {
-        return city.toLowerCase().startsWith(letter.toLowerCase());
+        return cityNameNormalizer.normalize(city)
+                .startsWith(cityNameNormalizer.normalize(letter));
     }
 
     private String getLastLetter(String city) {
-        String normalizedCity = cityRepository.normalizeCityName(city);
+        String normalizedCity = cityNameNormalizer.normalize(city);
         int index = normalizedCity.length() - 1;
 
-        while (index > 0 && isSpecialEndingLetter(normalizedCity.charAt(index))) {
+        while (index > 0
+                && isSpecialEndingLetter(normalizedCity.charAt(index))) {
             index--;
         }
 
@@ -165,4 +169,3 @@ public class CityGame {
         return letter == 'ь' || letter == 'ъ';
     }
 }
-

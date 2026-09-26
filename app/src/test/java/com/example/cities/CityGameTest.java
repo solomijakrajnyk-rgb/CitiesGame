@@ -1,6 +1,7 @@
 package com.example.cities;
 
 import com.example.cities.game.CityGame;
+import com.example.cities.game.CityNameNormalizer;
 import com.example.cities.game.CityRepository;
 import com.example.cities.game.GameStatus;
 import com.example.cities.game.MoveResult;
@@ -8,13 +9,21 @@ import com.example.cities.game.MoveStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CityGameTest {
 
+    private CityGame createGame() {
+        CityNameNormalizer cityNameNormalizer =
+                new CityNameNormalizer();
+        CityRepository cityRepository =
+                new CityRepository(cityNameNormalizer);
+
+        return new CityGame(cityRepository);
+    }
+
     @Test
     void shouldAcceptFirstCity() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
@@ -26,7 +35,7 @@ class CityGameTest {
 
     @Test
     void shouldRejectUnknownCity() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("Варшава");
 
@@ -41,7 +50,7 @@ class CityGameTest {
 
     @Test
     void shouldRejectCityWithWrongFirstLetter() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         game.processPlayerMove("Луцьк");
 
@@ -58,7 +67,7 @@ class CityGameTest {
 
     @Test
     void shouldRejectRepeatedCity() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         game.processPlayerMove("Луцьк");
 
@@ -75,7 +84,7 @@ class CityGameTest {
 
     @Test
     void shouldUpdateScoreAfterValidMove() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
@@ -86,7 +95,7 @@ class CityGameTest {
 
     @Test
     void shouldHandleSurrenderInGameLogic() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("здаюсь");
 
@@ -95,12 +104,15 @@ class CityGameTest {
                 "Ви здалися.\nПереміг комп'ютер!",
                 result.getMessage()
         );
-        assertEquals(GameStatus.COMPUTER_WON, game.getGameStatus());
+        assertEquals(
+                GameStatus.COMPUTER_WON,
+                game.getGameStatus()
+        );
     }
 
     @Test
     void shouldNotAllowMoveAfterGameIsOver() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         game.processPlayerMove("здаюсь");
 
@@ -115,7 +127,7 @@ class CityGameTest {
 
     @Test
     void shouldAcceptCityWithDifferentLetterCase() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("ЛУЦЬК");
 
@@ -125,7 +137,7 @@ class CityGameTest {
 
     @Test
     void shouldAcceptCityWithExtraSpaces() {
-        CityGame game = new CityGame(new CityRepository());
+        CityGame game = createGame();
 
         MoveResult result = game.processPlayerMove("  Луцьк  ");
 
