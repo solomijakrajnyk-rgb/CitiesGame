@@ -12,42 +12,66 @@ import javax.swing.SwingUtilities;
 public class AppLauncher {
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(AppLauncher::showWelcomeWindow);
+        SwingUtilities.invokeLater(AppLauncher::startApplication);
     }
 
-    private static void showWelcomeWindow() {
-        WelcomeWindow welcomeWindow =
-                new WelcomeWindow(AppLauncher::startNewGame);
-
-        welcomeWindow.setVisible(true);
-    }
-
-    private static void startNewGame() {
+    private static void startApplication() {
         try {
             CityNameNormalizer cityNameNormalizer =
                     new CityNameNormalizer();
             CityRepository cityRepository =
                     new CityRepository(cityNameNormalizer);
-            CityGame cityGame =
-                    new CityGame(cityRepository);
 
-            GameWindow gameWindow =
-                    new GameWindow(
-                            cityGame,
-                            AppLauncher::showWelcomeWindow
-                    );
-
-            gameWindow.setVisible(true);
+            showWelcomeWindow(
+                    cityRepository,
+                    cityNameNormalizer
+            );
         } catch (IllegalStateException exception) {
             JOptionPane.showMessageDialog(
                     null,
                     "Не вдалося завантажити список міст.\n"
-                            + "Спробуйте перезапустити програму.",
-                    "Помилка запуску",
+                            + "Програма буде завершена.",
+                    "Критична помилка",
                     JOptionPane.ERROR_MESSAGE
             );
 
-            showWelcomeWindow();
+            System.exit(1);
         }
+    }
+
+    private static void showWelcomeWindow(
+            CityRepository cityRepository,
+            CityNameNormalizer cityNameNormalizer) {
+
+        WelcomeWindow welcomeWindow =
+                new WelcomeWindow(() ->
+                        startNewGame(
+                                cityRepository,
+                                cityNameNormalizer
+                        ));
+
+        welcomeWindow.setVisible(true);
+    }
+
+    private static void startNewGame(
+            CityRepository cityRepository,
+            CityNameNormalizer cityNameNormalizer) {
+
+        CityGame cityGame =
+                new CityGame(
+                        cityRepository,
+                        cityNameNormalizer
+                );
+
+        GameWindow gameWindow =
+                new GameWindow(
+                        cityGame,
+                        () -> showWelcomeWindow(
+                                cityRepository,
+                                cityNameNormalizer
+                        )
+                );
+
+        gameWindow.setVisible(true);
     }
 }

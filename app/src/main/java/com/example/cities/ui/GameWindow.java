@@ -178,9 +178,13 @@ public class GameWindow extends JFrame {
     }
 
     private Image loadIcon() {
-        ImageIcon icon = new ImageIcon(
-                getClass().getResource("/cities-icon.png")
-        );
+        var iconUrl = getClass().getResource("/cities-icon.png");
+
+        if (iconUrl == null) {
+            return null;
+        }
+
+        ImageIcon icon = new ImageIcon(iconUrl);
 
         return icon.getImage().getScaledInstance(
                 32,

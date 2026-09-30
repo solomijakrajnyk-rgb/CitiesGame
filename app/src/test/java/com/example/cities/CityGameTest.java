@@ -18,7 +18,10 @@ class CityGameTest {
         CityRepository cityRepository =
                 new CityRepository(cityNameNormalizer);
 
-        return new CityGame(cityRepository);
+        return new CityGame(
+                cityRepository,
+                cityNameNormalizer
+        );
     }
 
     @Test

@@ -15,9 +15,12 @@ public class CityGame {
     private int computerScore;
     private GameStatus gameStatus;
 
-    public CityGame(CityRepository cityRepository) {
+    public CityGame(
+            CityRepository cityRepository,
+            CityNameNormalizer cityNameNormalizer
+    ) {
         this.cityRepository = cityRepository;
-        cityNameNormalizer = new CityNameNormalizer();
+        this.cityNameNormalizer = cityNameNormalizer;
         usedCities = new HashSet<>();
         gameStatus = GameStatus.IN_PROGRESS;
     }
@@ -51,7 +54,8 @@ public class CityGame {
             );
         }
 
-        String cityFromRepository = cityRepository.findCity(normalizedCity);
+        String cityFromRepository =
+                cityRepository.findCity(normalizedCity);
 
         if (cityFromRepository == null) {
             return new MoveResult(
@@ -69,7 +73,8 @@ public class CityGame {
             );
         }
 
-        if (lastCity != null && !startsWithRequiredLetter(cityFromRepository)) {
+        if (lastCity != null
+                && !startsWithRequiredLetter(cityFromRepository)) {
             return new MoveResult(
                     MoveStatus.WRONG_LETTER,
                     null,

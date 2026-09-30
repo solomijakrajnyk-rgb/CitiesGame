@@ -7,40 +7,33 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class CityRepository {
 
     private static final String CITIES_FILE = "/cities.txt";
 
-    private final List<String> cities;
+    private final Map<String, String> cities;
     private final CityNameNormalizer cityNameNormalizer;
 
     public CityRepository(CityNameNormalizer cityNameNormalizer) {
         this.cityNameNormalizer = cityNameNormalizer;
-        cities = Collections.unmodifiableList(loadCities());
+        cities = Collections.unmodifiableMap(loadCities());
     }
 
     public List<String> getCities() {
-        return cities;
+        return new ArrayList<>(cities.values());
     }
 
     public String findCity(String city) {
         String normalizedCity = cityNameNormalizer.normalize(city);
-
-        return cities.stream()
-                .filter(availableCity ->
-                        cityNameNormalizer.normalize(availableCity)
-                                .equals(normalizedCity))
-                .findFirst()
-                .orElse(null);
+        return cities.get(normalizedCity);
     }
 
-    private List<String> loadCities() {
-        List<String> loadedCities = new ArrayList<>();
-        Set<String> normalizedCities = new HashSet<>();
+    private Map<String, String> loadCities() {
+        Map<String, String> loadedCities = new LinkedHashMap<>();
 
         try (InputStream inputStream = getClass()
                 .getResourceAsStream(CITIES_FILE)) {
@@ -63,9 +56,8 @@ public class CityRepository {
                     String normalizedCity =
                             cityNameNormalizer.normalize(city);
 
-                    if (!normalizedCity.isEmpty()
-                            && normalizedCities.add(normalizedCity)) {
-                        loadedCities.add(city);
+                    if (!normalizedCity.isEmpty()) {
+                        loadedCities.putIfAbsent(normalizedCity, city);
                     }
                 }
             }
