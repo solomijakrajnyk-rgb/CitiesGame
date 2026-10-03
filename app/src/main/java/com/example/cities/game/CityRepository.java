@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,15 +15,17 @@ public class CityRepository {
     private static final String CITIES_FILE = "/cities.txt";
 
     private final Map<String, String> cities;
+    private final List<String> cityList;
     private final CityNameNormalizer cityNameNormalizer;
 
     public CityRepository(CityNameNormalizer cityNameNormalizer) {
         this.cityNameNormalizer = cityNameNormalizer;
         cities = Collections.unmodifiableMap(loadCities());
+        cityList = List.copyOf(cities.values());
     }
 
     public List<String> getCities() {
-        return new ArrayList<>(cities.values());
+        return cityList;
     }
 
     public String findCity(String city) {

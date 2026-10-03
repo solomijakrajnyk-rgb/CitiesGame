@@ -102,10 +102,10 @@ public class GameWindow extends JFrame {
 
         MoveResult result = game.processPlayerMove(playerCity);
 
-        switch (result.getStatus()) {
+        switch (result.status()) {
             case VALID:
                 computerAnswerLabel.setText(
-                        "Комп'ютер: " + result.getComputerCity()
+                        "Комп'ютер: " + result.computerCity()
                 );
                 updateScore();
                 clearInput();
@@ -114,17 +114,17 @@ public class GameWindow extends JFrame {
             case INVALID_CITY:
             case ALREADY_USED:
             case WRONG_LETTER:
-                showError(result.getMessage());
+                showError(result.message());
                 break;
 
             case PLAYER_WON:
             case COMPUTER_WON:
                 updateScore();
-                showGameOver(result.getMessage());
+                showGameOver(result.message());
                 break;
 
             case GAME_OVER:
-                showError(result.getMessage());
+                showError(result.message());
                 break;
         }
     }

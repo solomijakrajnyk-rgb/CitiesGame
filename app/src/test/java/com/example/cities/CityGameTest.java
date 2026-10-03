@@ -30,8 +30,8 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
-        assertEquals(MoveStatus.VALID, result.getStatus());
-        assertEquals("Київ", result.getComputerCity());
+        assertEquals(MoveStatus.VALID, result.status());
+        assertEquals("Київ", result.computerCity());
         assertEquals(1, game.getPlayerScore());
         assertEquals(1, game.getComputerScore());
     }
@@ -42,10 +42,10 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Варшава");
 
-        assertEquals(MoveStatus.INVALID_CITY, result.getStatus());
+        assertEquals(MoveStatus.INVALID_CITY, result.status());
         assertEquals(
                 "Такого міста немає в грі.",
-                result.getMessage()
+                result.message()
         );
         assertEquals(0, game.getPlayerScore());
         assertEquals(0, game.getComputerScore());
@@ -59,10 +59,10 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Одеса");
 
-        assertEquals(MoveStatus.WRONG_LETTER, result.getStatus());
+        assertEquals(MoveStatus.WRONG_LETTER, result.status());
         assertEquals(
                 "Місто має починатися з літери \"в\".",
-                result.getMessage()
+                result.message()
         );
         assertEquals(1, game.getPlayerScore());
         assertEquals(1, game.getComputerScore());
@@ -76,10 +76,10 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
-        assertEquals(MoveStatus.ALREADY_USED, result.getStatus());
+        assertEquals(MoveStatus.ALREADY_USED, result.status());
         assertEquals(
                 "Це місто вже використовувалося.",
-                result.getMessage()
+                result.message()
         );
         assertEquals(1, game.getPlayerScore());
         assertEquals(1, game.getComputerScore());
@@ -91,7 +91,7 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
-        assertEquals(MoveStatus.VALID, result.getStatus());
+        assertEquals(MoveStatus.VALID, result.status());
         assertEquals(1, game.getPlayerScore());
         assertEquals(1, game.getComputerScore());
     }
@@ -102,10 +102,10 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("здаюсь");
 
-        assertEquals(MoveStatus.COMPUTER_WON, result.getStatus());
+        assertEquals(MoveStatus.COMPUTER_WON, result.status());
         assertEquals(
                 "Ви здалися.\nПереміг комп'ютер!",
-                result.getMessage()
+                result.message()
         );
         assertEquals(
                 GameStatus.COMPUTER_WON,
@@ -121,10 +121,10 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("Луцьк");
 
-        assertEquals(MoveStatus.GAME_OVER, result.getStatus());
+        assertEquals(MoveStatus.GAME_OVER, result.status());
         assertEquals(
                 "Гра вже завершена.",
-                result.getMessage()
+                result.message()
         );
     }
 
@@ -134,8 +134,8 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("ЛУЦЬК");
 
-        assertEquals(MoveStatus.VALID, result.getStatus());
-        assertEquals("Київ", result.getComputerCity());
+        assertEquals(MoveStatus.VALID, result.status());
+        assertEquals("Київ", result.computerCity());
     }
 
     @Test
@@ -144,7 +144,7 @@ class CityGameTest {
 
         MoveResult result = game.processPlayerMove("  Луцьк  ");
 
-        assertEquals(MoveStatus.VALID, result.getStatus());
-        assertEquals("Київ", result.getComputerCity());
+        assertEquals(MoveStatus.VALID, result.status());
+        assertEquals("Київ", result.computerCity());
     }
 }

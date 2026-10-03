@@ -138,7 +138,8 @@ public class CityGame {
 
         for (String city : cities) {
             if (!usedCities.contains(city)
-                    && startsWith(city, requiredLetter)) {
+                    && (requiredLetter.isEmpty()
+                    || startsWith(city, requiredLetter))) {
                 usedCities.add(city);
                 lastCity = city;
                 computerScore++;
@@ -150,7 +151,10 @@ public class CityGame {
     }
 
     private boolean startsWithRequiredLetter(String city) {
-        return startsWith(city, getRequiredLetter());
+        String requiredLetter = getRequiredLetter();
+
+        return requiredLetter.isEmpty()
+                || startsWith(city, requiredLetter);
     }
 
     private boolean startsWith(String city, String letter) {
@@ -162,9 +166,13 @@ public class CityGame {
         String normalizedCity = cityNameNormalizer.normalize(city);
         int index = normalizedCity.length() - 1;
 
-        while (index > 0
+        while (index >= 0
                 && isSpecialEndingLetter(normalizedCity.charAt(index))) {
             index--;
+        }
+
+        if (index < 0) {
+            return "";
         }
 
         return String.valueOf(normalizedCity.charAt(index));

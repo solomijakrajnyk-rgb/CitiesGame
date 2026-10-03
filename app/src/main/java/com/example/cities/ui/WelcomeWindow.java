@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.net.URL;
 
 public class WelcomeWindow extends JFrame {
 
@@ -19,7 +20,12 @@ public class WelcomeWindow extends JFrame {
         this.startGameAction = startGameAction;
 
         setTitle("Міста");
-        setIconImage(loadIcon());
+
+        Image icon = loadIcon();
+        if (icon != null) {
+            setIconImage(icon);
+        }
+
         setSize(400, 100);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -50,11 +56,13 @@ public class WelcomeWindow extends JFrame {
     }
 
     private Image loadIcon() {
-        ImageIcon icon = new ImageIcon(
-                getClass().getResource("/cities-icon.png")
-        );
+        URL iconUrl = getClass().getResource("/cities-icon.png");
 
-        return icon.getImage().getScaledInstance(
+        if (iconUrl == null) {
+            return null;
+        }
+
+        return new ImageIcon(iconUrl).getImage().getScaledInstance(
                 32,
                 32,
                 Image.SCALE_SMOOTH
